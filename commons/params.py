@@ -42,7 +42,7 @@ _windows_tgt_path = "F:/data/mnist_m/mini/train"
 _linux_tgt_path = "/home/zhangjie/data/mnist/train/target"
 target_data_path = _linux_tgt_path if _IS_LINUX else _windows_tgt_path
 
-iterations = 50
+iterations = 100
 batch_size = 30
 learning_rate = 0.001 #TODO: tunable
 save_model_path = "trained_models"

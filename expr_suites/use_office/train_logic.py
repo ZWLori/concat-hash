@@ -2,7 +2,8 @@
 specific training procedures other than the general training framework
 """
 import torch
-from expr_suites.use_office.utils import _add_loss_term,_get_quantization_loss, get_crossdom_pairwise_sim_loss,get_pairwise_sim_loss
+from expr_suites.use_office.utils import _add_loss_term,_get_quantization_loss, get_crossdom_pairwise_sim_loss
+from commons.ml_train.utils import get_pairwise_sim_loss
 
 def _get_specific_code_loss(specific_feat,labels,loss_coeff):
     "return a torch Variable as loss"

@@ -5,6 +5,7 @@ import itertools
 import os
 import torch
 from torch.autograd import Variable
+from commons.ml_test.testing_utils import _load_models_from_path
 
 from commons.ml_train.utils import save_param_module, get_data_loader, save_models
 
@@ -40,8 +41,20 @@ def training(params, logger, model_def,train_func, save_model_to=""):
     total_loss_records = []
     shared_loss_records = []
     specific_loss_records = []
+    if os.path.exists(os.path.join(save_model_to, "epoch.txt")):
+        with open(os.path.join(save_model_to, "epoch.txt"), "r") as f:
+            epoch = int(f.read().replace('\n', ''))
+            if epoch < params.iterations:
+                start = epoch
+    else:
+        start = 0
 
-    for i in range(params.iterations):
+    for i in range(start, params.iterations):
+        if start:
+            model = _load_models_from_path(save_model_to, params, model_def, False, True)
+            basic_feat_ext = model['basic_feat_ext']
+            specific_feat_gen = model['specific_feat_gen']
+            shared_feat_gen = model['shared_feat_gen']
         # refresh data loader
         itertools.tee(source_loader)
         itertools.tee(target_loader)
@@ -84,9 +97,9 @@ def training(params, logger, model_def,train_func, save_model_to=""):
                 opt_basic_feat.step()
                 opt_shared_feat.step()
 
-            if (shared_loss !=0):
+            if (shared_loss.cpu().data.numpy()[0] !=0):
                 acc_shared_loss += shared_loss.cpu().data.numpy()[0]
-            if (specific_loss !=0):
+            if (specific_loss.cpu().data.numpy()[0] !=0):
                 acc_specific_loss += specific_loss.cpu().data.numpy()[0]
 
         total_loss_records.append(acc_total_loss/(step+1))
@@ -94,13 +107,16 @@ def training(params, logger, model_def,train_func, save_model_to=""):
         specific_loss_records.append(acc_specific_loss/(step+1))
         logger.info("epoch {} | total loss: {}, shared loss: {}, specific loss: {}".format(i, acc_total_loss / (step+1),acc_shared_loss/(step+1), acc_specific_loss/(step+1)))
 
-
-    # save model params
-    save_models(models={"basic_feat_ext":basic_feat_ext,"shared_feat_gen":shared_feat_gen,"specific_feat_gen":specific_feat_gen},
-                save_model_to=save_model_to,save_obj=True,save_params=True)
-    # save the training settings
-    save_param_module(params=params,save_to=os.path.join(save_model_to, "train_settings.txt"))
-    logger.info("model saved")
+        if i % 10 == 9:
+            # save model params
+            save_models(models={"basic_feat_ext": basic_feat_ext, "shared_feat_gen": shared_feat_gen,
+                                "specific_feat_gen": specific_feat_gen},
+                        save_model_to=save_model_to, save_obj=True, save_params=True)
+            # save the training settings
+            save_param_module(params=params, save_to=os.path.join(save_model_to, "train_settings.txt"))
+            with open(os.path.join(save_model_to, 'epoch.txt'), 'w') as f:
+                f.write(str(i))
+            logger.info("model saved")
 
     return {
         "total_loss_records": total_loss_records,

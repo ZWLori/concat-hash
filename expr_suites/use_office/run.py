@@ -14,16 +14,16 @@ from commons.ml_train.utils import get_data_loader, save_param_module, LoggerGen
 from expr_suites.use_office import model as test_model
 
 root_save_dir = "saved_models/a2w"
-root_log_dir = "F:\\Project\\temp-projects\\pytorch-test\\log\\expr"
+root_log_dir = "log"
 
 params.hash_size = 8
 params.specific_hash_size = 8
 # 1. set the common params
-params.source_data_path = "F:/data/domain_adaptation_images/original/amazon"
+params.source_data_path = "/home/zwlori/data/domain_adaptation_images/amazon"
 params.feat_gen_out_tanh = True
 params.test_data_path = {
-    "query": "F:/data/domain_adaptation_images/test/query-db-split/webcam/query",
-    "db": "F:/data/domain_adaptation_images/test/query-db-split/webcam/db"
+    "query": "F:/data/domain_adaptation_images/webcam_mini/query",
+    "db": "F:/data/domain_adaptation_images/webcam_mini/db"
 }
 params.specific_loss_coeff = {
     "target": 1, "quantization": 0.05
@@ -42,7 +42,7 @@ def train(params,id,overall_coeff):
     save_model_path = os.path.join(root_save_dir, str(id))
     save_result_path = os.path.join(save_model_path,"test_results")
     save_log_path = os.path.join(root_log_dir, "{}.txt".format(id))
-    """
+
     if (not os.path.exists(save_model_path)):
         os.makedirs(save_model_path)
         os.makedirs(save_result_path)
@@ -62,7 +62,7 @@ def train(params,id,overall_coeff):
     with open(os.path.join(save_result_path,"train_records.txt"),"w") as f:
         f.write(str(train_results))
     print("finish training for parameter set #{}".format(id))
-    """
+
 
     # perform testing
     results = run_simple_test(params=params, saved_model_path=save_model_path,model_def=test_model)
@@ -75,7 +75,8 @@ def train(params,id,overall_coeff):
 
 
 if __name__ == "__main__":
+    os.environ["CUDA_VISIBLE_DEVICES"] = "GPU-71e09309-c794-267a-4f6f-7d9a96ed9bb9"
     params.iterations = 150
     overall_coeff = {"specific": 0.2, "shared": 0.8}
-    params.target_data_path = "F:/data/domain_adaptation_images/train/webcam"
+    params.target_data_path = "/home/zwlori/data/domain_adaptation_images/webcam_mini/train"
     train(params=params, id=0, overall_coeff=overall_coeff)

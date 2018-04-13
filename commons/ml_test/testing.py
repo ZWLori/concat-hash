@@ -14,7 +14,7 @@ from sklearn.model_selection import KFold  # import KFold
 from torch import nn
 from torch.autograd import Variable
 
-from commons.ml_test.testing_utils import _get_data_loader, _construct_hash_function, _create_label_hash_dicts, _save_hash_code
+from commons.ml_test.testing_utils import _get_data_loader, _construct_hash_function, _create_label_hash_dicts, _save_hash_code, _load_models_from_path
 
 
 # ml_test hashing performance
